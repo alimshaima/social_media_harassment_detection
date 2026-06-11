@@ -1,0 +1,453 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Social Media Harassment Detector</title>
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      body {
+        font-family:
+          -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu,
+          sans-serif;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        min-height: 100vh;
+        padding: 20px;
+      }
+
+      .container {
+        max-width: 800px;
+        margin: 0 auto;
+        background: white;
+        border-radius: 20px;
+        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+        overflow: hidden;
+      }
+
+      .header {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        padding: 30px;
+        text-align: center;
+      }
+
+      .header h1 {
+        font-size: 2em;
+        margin-bottom: 10px;
+      }
+
+      .header p {
+        opacity: 0.9;
+      }
+
+      .content {
+        padding: 30px;
+      }
+
+      .input-group {
+        margin-bottom: 20px;
+      }
+
+      label {
+        display: block;
+        margin-bottom: 10px;
+        font-weight: bold;
+        color: #333;
+      }
+
+      textarea {
+        width: 100%;
+        padding: 15px;
+        font-size: 16px;
+        border: 2px solid #e0e0e0;
+        border-radius: 10px;
+        resize: vertical;
+        font-family: inherit;
+        transition: border-color 0.3s;
+      }
+
+      textarea:focus {
+        outline: none;
+        border-color: #667eea;
+      }
+
+      button {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        border: none;
+        padding: 12px 30px;
+        font-size: 16px;
+        border-radius: 8px;
+        cursor: pointer;
+        transition: transform 0.2s;
+      }
+
+      button:hover {
+        transform: translateY(-2px);
+      }
+
+      button:active {
+        transform: translateY(0);
+      }
+
+      .result {
+        margin-top: 30px;
+        padding: 20px;
+        border-radius: 10px;
+        display: none;
+      }
+
+      .result.show {
+        display: block;
+        animation: slideIn 0.3s ease;
+      }
+
+      @keyframes slideIn {
+        from {
+          opacity: 0;
+          transform: translateY(-10px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+
+      .result.harassment {
+        background: #fee;
+        border-left: 4px solid #e74c3c;
+      }
+
+      .result.safe {
+        background: #e8f5e9;
+        border-left: 4px solid #4caf50;
+      }
+
+      .result h3 {
+        margin-bottom: 10px;
+      }
+
+      .confidence-bar {
+        background: #ddd;
+        height: 30px;
+        border-radius: 15px;
+        overflow: hidden;
+        margin: 10px 0;
+      }
+
+      .confidence-fill {
+        height: 100%;
+        transition: width 0.3s ease;
+        display: flex;
+        align-items: center;
+        justify-content: flex-end;
+        padding-right: 10px;
+        color: white;
+        font-size: 12px;
+        font-weight: bold;
+      }
+
+      .harassment .confidence-fill {
+        background: linear-gradient(90deg, #e74c3c, #c0392b);
+      }
+
+      .safe .confidence-fill {
+        background: linear-gradient(90deg, #4caf50, #388e3c);
+      }
+
+      .badge {
+        display: inline-block;
+        padding: 4px 12px;
+        border-radius: 20px;
+        font-size: 12px;
+        font-weight: bold;
+        margin-top: 10px;
+      }
+
+      .badge.harassment {
+        background: #e74c3c;
+        color: white;
+      }
+
+      .badge.safe {
+        background: #4caf50;
+        color: white;
+      }
+
+      .examples {
+        margin-top: 30px;
+        padding: 20px;
+        background: #f5f5f5;
+        border-radius: 10px;
+      }
+
+      .examples h3 {
+        margin-bottom: 10px;
+      }
+
+      .example-buttons {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+      }
+
+      .example-btn {
+        background: white;
+        color: #333;
+        padding: 8px 15px;
+        font-size: 14px;
+        margin: 0;
+      }
+
+      .example-btn:hover {
+        transform: none;
+        background: #e0e0e0;
+      }
+
+      .loading {
+        display: none;
+        text-align: center;
+        margin-top: 20px;
+      }
+
+      .loading.show {
+        display: block;
+      }
+
+      .spinner {
+        border: 3px solid #f3f3f3;
+        border-top: 3px solid #667eea;
+        border-radius: 50%;
+        width: 40px;
+        height: 40px;
+        animation: spin 1s linear infinite;
+        margin: 0 auto;
+      }
+
+      @keyframes spin {
+        0% {
+          transform: rotate(0deg);
+        }
+        100% {
+          transform: rotate(360deg);
+        }
+      }
+
+      .error {
+        background: #fee;
+        border-left: 4px solid #e74c3c;
+        padding: 15px;
+        border-radius: 10px;
+        margin-top: 20px;
+        color: #c62828;
+      }
+
+      @media (max-width: 600px) {
+        .container {
+          margin: 10px;
+        }
+
+        .header h1 {
+          font-size: 1.5em;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <div class="header">
+        <h1>🔍 Social Media Harassment Detector</h1>
+        <p>AI-powered detection of harmful content</p>
+      </div>
+
+      <div class="content">
+        <div class="input-group">
+          <label for="textInput">Enter text to analyze:</label>
+          <textarea
+            id="textInput"
+            rows="4"
+            placeholder="Type or paste a message here..."
+          ></textarea>
+        </div>
+
+        <button onclick="analyzeText()">🔍 Analyze Text</button>
+
+        <div class="loading" id="loading">
+          <div class="spinner"></div>
+          <p>Analyzing...</p>
+        </div>
+
+        <div id="errorMessage" class="error" style="display: none"></div>
+
+        <div class="result" id="result">
+          <h3 id="resultTitle"></h3>
+          <div class="confidence-bar">
+            <div class="confidence-fill" id="confidenceFill">0%</div>
+          </div>
+          <p id="resultMessage"></p>
+          <span class="badge" id="badge"></span>
+          <p
+            style="margin-top: 10px; font-size: 12px; color: #666"
+            id="methodInfo"
+          ></p>
+        </div>
+
+        <div class="examples">
+          <h3>📝 Try these examples:</h3>
+          <div class="example-buttons">
+            <button class="example-btn" onclick="setExample('hi')">hi</button>
+            <button class="example-btn" onclick="setExample('hiiiiiiiii')">
+              hiiiiiiiii
+            </button>
+            <button class="example-btn" onclick="setExample('hw r u')">
+              hw r u
+            </button>
+            <button class="example-btn" onclick="setExample('how are you')">
+              how are you
+            </button>
+            <button class="example-btn" onclick="setExample('good morning')">
+              good morning
+            </button>
+            <button class="example-btn" onclick="setExample('kill yourself')">
+              kill yourself
+            </button>
+            <button class="example-btn" onclick="setExample('you are stupid')">
+              you are stupid
+            </button>
+            <button class="example-btn" onclick="setExample('fuck you')">
+              fuck you
+            </button>
+            <button class="example-btn" onclick="setExample('you bitch')">
+              you bitch
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      async function analyzeText() {
+        const text = document.getElementById("textInput").value.trim();
+        const resultDiv = document.getElementById("result");
+        const errorDiv = document.getElementById("errorMessage");
+        const loadingDiv = document.getElementById("loading");
+
+        // Hide previous results
+        resultDiv.classList.remove("show");
+        errorDiv.style.display = "none";
+
+        if (!text) {
+          showError("Please enter some text to analyze.");
+          return;
+        }
+
+        // Show loading
+        loadingDiv.classList.add("show");
+
+        try {
+          const response = await fetch("/predict", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({ text: text }),
+          });
+
+          const data = await response.json();
+
+          if (!response.ok || data.error) {
+            throw new Error(data.error || "Something went wrong");
+          }
+
+          if (data.success && data.result) {
+            displayResult(data.result);
+          } else {
+            throw new Error("Invalid response from server");
+          }
+        } catch (error) {
+          console.error("Error:", error);
+          showError(error.message);
+        } finally {
+          loadingDiv.classList.remove("show");
+        }
+      }
+
+      function displayResult(result) {
+        const resultDiv = document.getElementById("result");
+        const isHarassment = result.is_harassment;
+        const confidence = Math.round(
+          (result.harassment_probability || 0) * 100,
+        );
+        const detectionMethod = result.detection_method || "unknown";
+
+        // Set title and styling
+        const title = document.getElementById("resultTitle");
+        const badge = document.getElementById("badge");
+        const message = document.getElementById("resultMessage");
+        const methodInfo = document.getElementById("methodInfo");
+        const confidenceFill = document.getElementById("confidenceFill");
+
+        if (isHarassment) {
+          resultDiv.className = "result show harassment";
+          title.innerHTML = "🚨 HARASSMENT DETECTED!";
+          badge.className = "badge harassment";
+          badge.innerHTML = "⚠️ Harassment";
+          message.innerHTML = `⚠️ This message contains content that appears to be harassing or harmful.`;
+        } else {
+          resultDiv.className = "result show safe";
+          title.innerHTML = "✅ SAFE MESSAGE";
+          badge.className = "badge safe";
+          badge.innerHTML = "✓ Safe";
+          message.innerHTML = `✅ This message appears to be safe and non-harassing.`;
+        }
+
+        // Update confidence bar
+        confidenceFill.style.width = `${confidence}%`;
+        confidenceFill.innerHTML = `${confidence}% harassment probability`;
+
+        // Update method info
+        methodInfo.innerHTML = `Detection method: ${detectionMethod} | Original text: "${result.text || ""}"`;
+      }
+
+      function showError(message) {
+        const errorDiv = document.getElementById("errorMessage");
+        errorDiv.innerHTML = `<strong>Error:</strong> ${message}`;
+        errorDiv.style.display = "block";
+
+        // Auto-hide after 5 seconds
+        setTimeout(() => {
+          errorDiv.style.display = "none";
+        }, 5000);
+      }
+
+      function setExample(text) {
+        document.getElementById("textInput").value = text;
+        analyzeText();
+      }
+
+      // Allow Ctrl+Enter to submit
+      document
+        .getElementById("textInput")
+        .addEventListener("keydown", function (e) {
+          if ((e.ctrlKey || e.metaKey) && e.key === "Enter") {
+            analyzeText();
+          }
+        });
+
+      // Also allow Enter to submit (but not shift+enter for new lines)
+      document
+        .getElementById("textInput")
+        .addEventListener("keydown", function (e) {
+          if (e.key === "Enter" && !e.shiftKey) {
+            e.preventDefault();
+            analyzeText();
+          }
+        });
+    </script>
+  </body>
+</html>
