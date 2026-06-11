@@ -1,2 +1,78 @@
 # social_media_harassment_detection
-Social Media Harassment Detection System  • Detects offensive content with ML + pattern matching • Handles leetspeak and symbol obfuscation • Prevents false positives on safe phrases • Includes web interface and REST API • Built with Python, Flask, scikit-learn
+Social Media Harassment Detection System  
+• Detects offensive content with ML + pattern matching 
+• Handles leetspeak and symbol obfuscation 
+• Prevents false positives on safe phrases 
+• Includes web interface and REST API 
+• Built with Python, Flask, scikit-learn
+
+A hybrid machine learning and rule-based system that detects harassment, hate speech, and offensive content in social media posts, comments, and messages.
+
+## Features
+
+- Detects harassment with both ML model and pattern matching
+- Handles leetspeak and symbol obfuscation like f*ck, b!tch, n8gga
+- Prevents false positives on safe phrases like "control freak"
+- Provides REST API via Flask
+- Includes user-friendly web interface
+- Supports batch processing for multiple texts
+
+## How It Works
+
+The system uses a two-layer approach. First, a comprehensive rule-based engine checks for offensive words, insult patterns, leetspeak variations, and symbol substitutions. Second, a trained machine learning model (Logistic Regression with TF-IDF features) provides additional classification. Safe greetings and harmless phrases like "how are you" are automatically whitelisted to prevent false alarms.
+
+## Installation
+git clone https://github.com/alimshaima/social-media-harassment-detection.git
+cd social-media-harassment-detection
+pip install -r requirements.txt
+
+## Commands
+# Train the model
+python train_model.py
+
+# Start web application
+python app.py
+
+# Test casual language
+python test_casual.py
+
+# Test symbols and leetspeak
+python test_symbols.py
+
+# Adjust detection threshold
+python adjust_threshold.py
+
+# Verify detection
+python verify_detection.py
+
+# Run all tests
+python run_all.py
+
+
+## Quick Test
+python -c "from src.prediction import HarassmentPredictor; p=HarassmentPredictor(); print(p.predict('you are stupid'))"
+
+## Project Structure
+
+├── app.py
+├── train_model.py
+├── src/
+│   ├── prediction.py
+│   ├── model_training.py
+│   └── data_preprocessing.py
+├── tests/
+├── templates/
+├── models/
+└── data/
+
+## Requirements
+
+Python 3.8+. Dependencies: pandas, numpy, scikit-learn, nltk, flask, joblib
+
+## Note
+
+The `models/` folder is not included in this repository. 
+Run `python train_model.py` to generate the model files locally.
+
+## Author
+Alima Shaima
